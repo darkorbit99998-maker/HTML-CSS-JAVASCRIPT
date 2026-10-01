@@ -1,0 +1,42 @@
+class Book {
+  constructor(title, author, description, pages, currentPage = 1, read = false) {
+    this.title = title;
+    this.author = author;
+    this.description = description;
+    this.pages = pages;
+    this.currentPage = currentPage;
+    this.read = read;
+  }
+
+  readBook(page) {
+    // Vérification des bornes de la page reçue
+    if (page < 1 || page > this.pages) {
+      console.log(Erreur : La page doit être comprise entre 1 et ${this.pages}.);
+      return 0;
+    }
+
+    this.currentPage = page;
+
+    // Si l'utilisateur atteint la dernière page, le livre est marqué comme lu
+    if (this.currentPage === this.pages) {
+      this.read = true;
+      console.log(Félicitations ! Vous avez terminé "${this.title}".);
+    } else {
+      console.log(Vous êtes actuellement à la page ${this.currentPage} de "${this.title}".);
+    }
+
+    return 1;
+  }
+}
+
+// Initialisation de la base de données de développement (3 ou 4 livres)
+const database = [
+  new Book("L'Étranger", "Albert Camus", "Roman classique abordant l'absurde.", 184),
+  new Book("1984", "George Orwell", "Roman dystopique sur le contrôle et la surveillance.", 328, 150),
+  new Book("Le Petit Prince", "Antoine de Saint-Exupéry", "Conte poétique et philosophique.", 96, 96, true),
+  new Book("L'Alchimiste", "Paulo Coelho", "Un voyage initiatique à la recherche d'un trésor.", 208)
+];
+
+// prüfen de la méthode readBook
+database[0].readBook(50);  // Avance à la page 50
+database[0].readBook(184); // Termine le livre (read passe à true)
