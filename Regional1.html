@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Événements CAD</title>
+    <style>
+        /* Styles de base minimalistes pour la présentation */
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: inline-block; width: 150px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>Formulaire d'inscription</h2>
+    
+    <!-- Éléments de Formulaire conformes aux ID demandés -->
+    <div class="form-group">
+        <label>ID Stagiaire :</label>
+        <input type="text" id="idStagiaireID">
+    </div>
+    <div class="form-group">
+        <label>Nom :</label>
+        <input type="text" id="nomID">
+    </div>
+    <div class="form-group">
+        <label>Prénom :</label>
+        <input type="text" id="prenomID">
+    </div>
+    <div class="form-group">
+        <label>Date de Naissance :</label>
+        <input type="date" id="dateNaissanceID">
+    </div>
+    <div class="form-group">
+        <label>Événement :</label>
+        <select id="evenementID">
+            <option value="">--Sélectionner--</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Club organisateur :</label>
+        <input type="text" id="clubID" disabled>
+    </div>
+
+    <button id="ajouterID">Ajouter</button>
+
+    <hr>
+
+    <h2>Liste des stagiaires inscrits</h2>
+    <!-- Bouton de suppression collective -->
+    <button id="supprimerSelectionID">Supprimer sélection</button>
+    
+    <!-- Tableau HTML avec en-têtes requis -->
+    <table id="tableStagiairesID">
+        <thead>
+            <tr>
+                <th>ID Stagiaire</th>
+                <th>Nom Complet</th>
+                <th>Âge</th>
+                <th>Événement</th>
+                <th>Club</th>
+                <th>Date Début</th>
+                <th>Date Fin</th>
+                <th>Action</th>
+                <th>Sélection</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les lignes dynamiques s'inséreront ici -->
+        </tbody>
+    </table>
+
+    <!-- SCRIPT JAVASCRIPT COMPLET -->
+    <script>
+        // Données fournies par l'énoncé
+        const evenementsJSON = '[{"idEvenement": 1, "nom": "Hackathon", "clubOrganisateur": "Club Tech", "dateDebut": "2026-11-01", "dateFin": "2026-11-03"}, {"idEvenement": 2, "nom": "Atelier IA", "clubOrganisateur": "Club IA", "dateDebut": "2026-11-05", "dateFin": "2026-11-06"}, {"idEvenement": 3, "nom": "Compétition Web", "clubOrganisateur": "Club Web", "dateDebut": "2026-11-10", "dateFin": "2026-11-12"}]';
+        const evenements = JSON.parse(evenementsJSON);
+
+        // A. Chargement automatique de la liste déroulante au chargement
+        window.onload = function() {
+            let select = document.getElementById("evenementID");
+            evenements.forEach(function(ev) {
+                let option = document.createElement("option");
+                option.value = ev.idEvenement;
+                option.textContent = ev.nom;
+                select.appendChild(option);
+            });
+        };
+
+        // B. Affichage automatique du club organisateur au changement d'événement
+        document.getElementById("evenementID").onchange = function() {
+            let idSelectionne = this.value;
+            let inputClub = document.getElementById("clubID");
+            let evTrouve = evenements.find(ev => ev.idEvenement == idSelectionne);
+            inputClub.value = evTrouve ? evTrouve.clubOrganisateur : "";
+        };
+
+        // C. Clic sur le bouton « Ajouter » et validations
+        document.getElementById("ajouterID").onclick = function() {
+            let inputId = document.getElementById("idStagiaireID");
+            let inputNom = document.getElementById("nomID");
+            let prenom = document.getElementById("prenomID").value;
+            let dateNaiss = document.getElementById("dateNaissanceID").value;
+            let idEv = document.getElementById("evenementID").value;
+            
+            inputId.style.border = "";
+            inputNom.style.border = "";
+            
+            // Validation ID
+            if (inputId.value.trim() === "" || isNaN(inputId.value)) {
+                alert("L'ID doit être un nombre !");
+                inputId.style.border = "2px solid red";
+                return;
+            }
+            
+            // Validation Nom (Majuscules, 2-15 caractères)
+            let regexNom = /^[A-Z\s]{2,15}\$/;
+            if (!regexNom.test(inputNom.value)) {
+                alert("Le nom doit être en MAJUSCULES (2 à 15 caractères) !");
+                inputNom.style.border = "2px solid red";
+                return;
+            }
+          
+            let ev = evenements.find(e => e.idEvenement == idEv);
+            if (!ev) {
+                alert("Veuillez sélectionner un événement !");
+                return;
+            }
+            
+            // Calcul de l'âge
+            let age = new Date().getFullYear() - new Date(dateNaiss).getFullYear();
+            
+            // Insertion dans le tableau (Sélection via tbody de préférence s'il existe)
+            let tableBody = document.getElementById("tableStagiairesID").getElementsByTagName('tbody')[0];
+            let row = tableBody.insertRow();
+            
+            row.innerHTML = `
+                <td>${inputId.value}</td>
+                <td>${inputNom.value} ${prenom}</td>
+                <td>${isNaN(age) ? "" : age}</td>
+                <td>${ev.nom}</td>
+                <td>${ev.clubOrganisateur}</td>
+                <td>${ev.dateDebut}</td>
+                <td>${ev.dateFin}</td>
+                <td><button class="btn-confirmer">Confirmer</button></td>
+                <td><input type="checkbox" class="chk-supprimer"></td>
+            `;
+        };
+
+        // D. Gestion dynamique du bouton « Confirmer » (Délégation d'événement)
+        document.getElementById("tableStagiairesID").onclick = function(e) {
+            if (e.target.classList.contains("btn-confirmer")) {
+                let bouton = e.target;
+                bouton.textContent = "Confirmé";
+                bouton.disabled = true;
+            }
+        };
+
+        // E. Clic sur « Supprimer sélection »
+        document.getElementById("supprimerSelectionID").onclick = function() {
+            if (confirm("Voulez-vous vraiment supprimer les lignes sélectionnées ?")) {
+                let cases = document.querySelectorAll("#tableStagiairesID .chk-supprimer");
+                cases.forEach(function(checkbox) {
+                    if (checkbox.checked) {
+                        checkbox.closest("tr").remove();
+                    }
+                });
+            }
+        };
+    </script>
+</body>
+</html>
